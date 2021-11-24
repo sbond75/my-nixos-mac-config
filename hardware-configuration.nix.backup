@@ -1,0 +1,23 @@
+{ modulesPath, ... }:
+{
+  imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
+  boot.loader.grub = {
+    efiSupport = true;
+    efiInstallAsRemovable = true;
+    device = "nodev";
+  };
+  fileSystems."/boot" = { device = "/dev/disk/by-uuid/70D6-1701"; fsType = "vfat"; };
+  boot.initrd.kernelModules = [ "nvme" ];
+  # file:///mnt2/old-root/etc/fstab , https://github.com/tudurom/dotfiles/blob/df86674e0b4cd33a889e6cd8182af605887b86f6/machines/anton/hardware.nix
+  fileSystems."/" = { device = "/dev/disk/by-uuid/d04c775a-e47f-4008-b5d4-11ac81c343b3"; fsType = "btrfs"; options = [ "defaults" "compress=zstd" "subvol=@" "noatime" ]; };
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/d04c775a-e47f-4008-b5d4-11ac81c343b3";
+      fsType = "btrfs";
+      options = [ "defaults" "subvol=@home" "noatime" ];
+    };
+  # https://discourse.nixos.org/t/wrong-swap-partition-detected-by-nixos-generate-config-on-fresh-install/5355
+  swapDevices =
+    [ {
+      device = "/dev/disk/by-uuid/c4aa5d0f-fe56-4cae-90ce-563fcd3364d4"; }
+    ];
+}
