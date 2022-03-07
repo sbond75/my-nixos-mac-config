@@ -20,7 +20,7 @@ in
   boot.loader.grub = {
     efiSupport = true;
     #efiInstallAsRemovable = true;
-    device = "nodev";
+    device = "nodev"; # No MBR installation
   };
   fileSystems."/boot" = { device = "/dev/disk/by-uuid/70D6-1701"; fsType = "vfat"; };
   boot.initrd.kernelModules = [ "nvme" ];
@@ -95,23 +95,84 @@ in
     pciutils usbutils
     wirelesstools
     networkmanager
+
+    ungoogled-chromium
+    htop
+    glances
+    xorg.xbacklight
+    xorg.xrandr
+    brightnessctl
+    #steam
+    #steam-run
+    glxinfo
+    xfce.xfce4-whiskermenu-plugin
+    redshift
+    xfce.xfce4panel
+    ntfs3g
+    ispell
+    xfce.xfce4-pulseaudio-plugin
+    gcc
+    gnome.gnome-keyring
+    tldr
+    zip
+    unzip
+    direnv
+    tmux
+    xfce.thunar-archive-plugin
+    lm_sensors
+
+    # TEMP, since nix-shell requires sudo currently to work, else an error like "nix opening lock file readonly file system" happens #
+    gdb
+    # #
+
+    lsof
+    usbmuxd
+    libimobiledevice
+
+    # temp #
+    python38
+    python38Packages.dbus-python
+    which
+
+    wpa_supplicant_gui
+    netcat-gnu
+    telnet
+    sox
+    mplayer
+    audacity
+    #realvnc-vnc-viewer
+    #tightvnc
+
+    gparted
+    ddrescue
+    ddrescueview
  ];
+  #programs.steam.enable = true;
+  hardware.opengl = {
+    enable = true;
+    driSupport32Bit = true;
+  };
+  hardware.pulseaudio.support32Bit = true; # https://jtojnar.github.io/dumpling/
 
   
   #boot.kernelModules = [ "wl" ];
   boot.extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
-
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "broadcom-sta"
-      "facetimehd-firmware"
-    ];
+  
+  nixpkgs.config.allowUnfree = true;
+  #nixpkgs.config.allowUnfreePredicate = pkg:
+  #  builtins.elem (lib.getName pkg) [
+  #    "broadcom-sta"
+  #    "facetimehd-firmware"
+  #    "steam"
+  #    "steam-original"
+  #    "steam-runtime"
+  #  ];
   boot.loader.systemd-boot.enable = false; #boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;  
 
   # https://github.com/siraben/dotfiles/blob/master/nixos/configuration.nix #
 
-  #time.timeZone = "America/Chicago";
+  time.timeZone = "America/Chicago";
   #networking.hostId = //TODO: unique ID?
 
   networking.networkmanager.enable = true;
@@ -156,11 +217,18 @@ in
     enable = true;
     
     desktopManager = {
+      #default = "xfce";
       xterm.enable = false;
+      xfce = {
+        enable = true;
+        noDesktop = true;
+        enableXfwm = false;
+      };
     };
     
     displayManager = {
-      defaultSession = "none+i3";
+      defaultSession = "xfce+i3";
+      #defaultSession = "none+i3";
     };
 
     windowManager.i3 = {
@@ -168,7 +236,7 @@ in
       extraPackages = with pkgs; [
         dmenu
         i3status
-        i3lock
+        #i3lock
         i3blocks
       ];
     };
